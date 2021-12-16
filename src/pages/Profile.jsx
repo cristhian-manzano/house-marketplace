@@ -1,32 +1,106 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { getAuth, updateProfile } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { db } from "../firebase.config";
+import { doc, updateDoc } from "firebase/firestore";
 
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { toast } from "react-toastify";
 
 function Profile() {
-  const [user, setUser] = useState(null);
-  const [authWasListened, setAuthWasListened] = useState(false);
+  const auth = getAuth();
 
-  const getUser = () => {
-    const auth = getAuth();
-    onAuthStateChanged(auth, (usr) => {
-      if (usr) setUser(usr);
-      else setUser(null);
+  const [formData, setFormData] = useState({
+    name: auth.currentUser?.displayName,
+    email: auth.currentUser?.email,
+  });
 
-      setAuthWasListened(true);
-    });
+  const [changeDetails, setchangeDetails] = useState(false);
+  const { name, email } = formData;
+  const navigate = useNavigate();
+
+  const onLogout = () => {
+    auth.signOut();
+    navigate("/");
   };
 
-  useEffect(() => {
-    getUser();
-  }, []);
+  const onSubmit = async () => {
+    try {
+      // Just updating name because in auth(firebase) cannot change email
+
+      if (auth.currentUser.displayName !== name) {
+        // Update display name in firebase
+        await updateProfile(auth.currentUser, {
+          displayName: name,
+        });
+
+        // update in firestore
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(userRef, {
+          name,
+        });
+      }
+    } catch (error) {
+      console.log("🚀 ~ file: Profile.jsx ~ line 44 ~ onSubmit ~ error", error);
+      toast.error("Could not update profile details");
+    }
+  };
+
+  const onChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
 
   return (
     <>
-      {authWasListened ? (
-        <h1>{user?.displayName ?? "No existe"}</h1>
-      ) : (
-        <div>waiting for auth...</div>
-      )}
+      <div className="profile">
+        <header className="profileHeader">
+          <p className="pageHeader">My Profile</p>
+          <button type="button" className="logOut" onClick={onLogout}>
+            Logout
+          </button>
+        </header>
+
+        <main>
+          <div className="profileDetailsHeader">
+            <p className="profileDetailsText">Personal Details</p>
+            <p
+              className="changePersonalDetails"
+              onClick={() => {
+                changeDetails && onSubmit();
+                setchangeDetails((prevState) => !prevState);
+              }}
+            >
+              {changeDetails ? "done" : "change"}
+            </p>
+          </div>
+
+          <div className="profileCard">
+            <form>
+              <input
+                type="text"
+                id="name"
+                className={!changeDetails ? "profileName" : "profileNameActive"}
+                disabled={!changeDetails}
+                value={name}
+                onChange={onChange}
+              />
+
+              <input
+                type="text"
+                id="email"
+                className={
+                  !changeDetails ? "profileEmail" : "profileEmailActive"
+                }
+                disabled={!changeDetails}
+                value={email}
+                onChange={onChange}
+              />
+            </form>
+          </div>
+        </main>
+      </div>
     </>
   );
 }
