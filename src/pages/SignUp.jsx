@@ -10,8 +10,9 @@ import {
 } from "firebase/auth";
 
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-
 import { db } from "../firebase.config";
+
+import { toast } from "react-toastify";
 
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
@@ -56,7 +57,8 @@ function SignUp() {
 
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.log("🚀 ~ file: SignUp.jsx ~ line 60 ~ onSubmit ~ error", error);
+      toast.error("Something went wrong with registration");
     }
   };
 
@@ -116,7 +118,7 @@ function SignUp() {
           </div>
         </form>
 
-        <Link to="sign-in" className="registerLink">
+        <Link to="/sign-in" className="registerLink">
           Sign In Instead
         </Link>
       </main>

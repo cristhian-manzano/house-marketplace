@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg"; // used as a component
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import visibilityIcon from "../assets/svg/visibilityIcon.svg"; // Used as a source
+
+import { toast } from "react-toastify";
 
 function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +23,31 @@ function SignIn() {
     }));
   };
 
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const auth = getAuth();
+
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      if (userCredential.user) {
+        console.log(
+          "🚀 ~ file: SignIn.jsx ~ line 41 ~ onSubmit ~ userCredential.user",
+          userCredential.user
+        );
+        navigate("/profile");
+      }
+    } catch (error) {
+      console.log("🚀 ~ file: SignIn.jsx ~ line 40 ~ onSubmit ~ error", error);
+      toast.error("Bad user credentials");
+    }
+  };
+
   return (
     <div className="pageContainer">
       <header>
@@ -27,7 +55,7 @@ function SignIn() {
       </header>
 
       <main>
-        <form>
+        <form onSubmit={onSubmit}>
           <input
             type="email"
             className="emailInput"
@@ -62,13 +90,13 @@ function SignIn() {
           <div className="signInBar">
             <p className="signInText">Sign In</p>
 
-            <button className="signInButton">
+            <button className="signInButton" type="submit">
               <ArrowRightIcon fill="#fff" width="34px" height="34px" />
             </button>
           </div>
         </form>
 
-        <Link to="sign-up" className="registerLink">
+        <Link to="/sign-up" className="registerLink">
           Sign Up Instead
         </Link>
       </main>
