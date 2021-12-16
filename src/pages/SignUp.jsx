@@ -3,6 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg"; // used as a component
 import visibilityIcon from "../assets/svg/visibilityIcon.svg"; // Used as a source
 
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+
+import { db } from "../firebase.config";
+
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -21,6 +31,35 @@ function SignUp() {
     }));
   };
 
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const auth = getAuth();
+
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const { user } = userCredential;
+
+      await updateProfile(auth.currentUser, {
+        displayName: name,
+      });
+
+      const formDataCopy = { ...formData, timestamp: serverTimestamp() };
+      delete formDataCopy.password;
+
+      await setDoc(doc(db, "users", user.uid), formDataCopy);
+
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="pageContainer">
       <header>
@@ -28,7 +67,7 @@ function SignUp() {
       </header>
 
       <main>
-        <form>
+        <form onSubmit={onSubmit}>
           <input
             type="name"
             className="nameInput"
@@ -71,7 +110,7 @@ function SignUp() {
           <div className="signUpBar">
             <p className="signUpText">Sign Up</p>
 
-            <button className="signUpButton">
+            <button className="signUpButton" type="submit">
               <ArrowRightIcon fill="#fff" width="34px" height="34px" />
             </button>
           </div>
