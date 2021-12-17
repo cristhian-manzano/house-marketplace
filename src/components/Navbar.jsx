@@ -7,7 +7,11 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const pathMatchRoute = (route) => route === location.pathname;
+  const pathMatchRoute = (route) => {
+    if (route === location.pathname) {
+      return true;
+    }
+  };
 
   return (
     <footer className="navbar">
@@ -37,12 +41,12 @@ function Navbar() {
             />
             <p
               className={
-                pathMatchRoute("/offers")
+                pathMatchRoute("/offer")
                   ? "navbarListItemNameActive"
                   : "navbarListItemName"
               }
             >
-              Offer
+              Offers
             </p>
           </li>
           <li className="navbarListItem" onClick={() => navigate("/profile")}>

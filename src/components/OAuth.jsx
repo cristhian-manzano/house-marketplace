@@ -15,11 +15,12 @@ function OAuth() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      // Check for user
 
+      // Check for user
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
 
+      // If user, doesn't exist, create user
       if (!docSnap.exists()) {
         await setDoc(doc(db, "users", user.uid), {
           name: user.displayName,
@@ -29,10 +30,6 @@ function OAuth() {
       }
       navigate("/");
     } catch (error) {
-      console.log(
-        "🚀 ~ file: OAuth.jsx ~ line 16 ~ onGoogleClick ~ error",
-        error
-      );
       toast.error("Could not authorize with Google");
     }
   };
