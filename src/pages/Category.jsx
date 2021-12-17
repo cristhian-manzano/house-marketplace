@@ -41,16 +41,16 @@ function Category() {
         const lastVisible = querySnap.docs[querySnap.docs.length - 1];
         setLastFetchedListing(lastVisible);
 
-        const listingsData = [];
+        const listings = [];
 
         querySnap.forEach((doc) => {
-          return listingsData.push({
+          return listings.push({
             id: doc.id,
             data: doc.data(),
           });
         });
 
-        setListings(listingsData);
+        setListings(listings);
         setLoading(false);
       } catch (error) {
         toast.error("Could not fetch listings");
@@ -81,16 +81,16 @@ function Category() {
       const lastVisible = querySnap.docs[querySnap.docs.length - 1];
       setLastFetchedListing(lastVisible);
 
-      const listingsData = [];
+      const listings = [];
 
       querySnap.forEach((doc) => {
-        return listingsData.push({
+        return listings.push({
           id: doc.id,
           data: doc.data(),
         });
       });
 
-      setListings((prevState) => [...prevState, ...listingsData]);
+      setListings((prevState) => [...prevState, ...listings]);
       setLoading(false);
     } catch (error) {
       toast.error("Could not fetch listings");
